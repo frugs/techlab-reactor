@@ -85,7 +85,7 @@ def get_hatchery_inject_states_for_player(player: Player, replay: Replay) -> lis
     return list(sorted(hatchery_inject_state_changes.values(), key=lambda x: x[0]))
 
 
-def calculate_inject_efficiency(inject_states: list):
+def calculate_inject_efficiency_from_frame(start_frame: int, inject_states: list):
     injected_frames = 0
     not_injected_frames = 0
 
@@ -105,7 +105,21 @@ def calculate_inject_efficiency(inject_states: list):
             elif not is_injected and not was_injected:
                 not_injected_frames += interval
 
-    return injected_frames / (not_injected_frames + injected_frames)
+    # Fudge, assumes no injects are started before 'start_frame'
+    return injected_frames / (not_injected_frames + injected_frames - start_frame)
 
 
+def calculate_overall_inject_efficiency(inject_states: list):
+    return calculate_inject_efficiency_from_frame(0, inject_states)
 
+
+def find_first_queen_completed_frame_for_player(player: Player, replay: Replay):
+    queen_birth_frames = list(sorted(
+        x.frame
+        for x in replay.tracker_events
+        if isinstance(x, UnitBornEvent) and x.unit_type_name == "Queen" and x.unit_controller == player))
+
+    if not queen_birth_frames:
+        return 0
+    else:
+        return queen_birth_frames[0]
