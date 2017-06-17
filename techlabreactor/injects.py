@@ -90,11 +90,16 @@ def calculate_inject_efficiency_from_frame(start_frame: int, inject_states: list
     not_injected_frames = 0
 
     for state_changes in inject_states:
-        for i, state_change in enumerate(state_changes[1:]):
-            was_injected = state_changes[i][1]
+
+        # Fudge, assumes no injects are started before 'start_frame'
+        adjusted_state_changes = list(state_changes)
+        adjusted_state_changes[0] = (max(adjusted_state_changes[0][0], start_frame), adjusted_state_changes[0][1])
+
+        for i, state_change in enumerate(adjusted_state_changes[1:]):
+            was_injected = adjusted_state_changes[i][1]
             is_injected = state_change[1]
 
-            interval = state_change[0] - state_changes[i][0]
+            interval = state_change[0] - adjusted_state_changes[i][0]
 
             if is_injected and was_injected:
                 injected_frames += interval
@@ -105,8 +110,7 @@ def calculate_inject_efficiency_from_frame(start_frame: int, inject_states: list
             elif not is_injected and not was_injected:
                 not_injected_frames += interval
 
-    # Fudge, assumes no injects are started before 'start_frame'
-    return injected_frames / (not_injected_frames + injected_frames - start_frame)
+    return injected_frames / (not_injected_frames + injected_frames)
 
 
 def calculate_overall_inject_efficiency(inject_states: list):
