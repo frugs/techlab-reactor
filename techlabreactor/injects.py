@@ -127,3 +127,27 @@ def find_first_queen_completed_frame_for_player(player: Player, replay: Replay):
         return 0
     else:
         return queen_birth_frames[0]
+
+
+def get_inject_pops_for_player(player: Player, replay: Replay) -> int:
+    fps = int(replay.game_fps)
+
+    all_hatchery_events = _hatchery_events_for_player(player, replay)
+
+    total_pops = 0
+
+    for hatchery_events in all_hatchery_events.values():
+        hatchery_pops = []
+
+        for event_time, event_name in hatchery_events:
+            if event_name == "Inject":
+                if not hatchery_pops or event_time > hatchery_pops[-1]:
+                    hatchery_pops.append(event_time + QUEEN_INJECT_SECONDS * fps)
+                else:
+                    hatchery_pops.append(hatchery_pops[-1] + QUEEN_INJECT_SECONDS * fps)
+            elif event_name == "End":
+                hatchery_pops = list(filter(lambda x: x < event_time, hatchery_pops))
+
+        total_pops += len(hatchery_pops)
+
+    return total_pops
