@@ -18,5 +18,5 @@ def generate_replay_summary(replay: Replay) -> dict:
         "title": title,
         "startTime": replay.start_time.strftime(DATE_TIME_FORMAT),
         "endTime": replay.end_time.strftime(DATE_TIME_FORMAT),
-        "duration": "{}:{}".format(replay.real_length.seconds // 60, replay.real_length.secs)
+        "duration": "{}:{02d}".format(*divmod(replay.real_length.seconds, 60))
     }
