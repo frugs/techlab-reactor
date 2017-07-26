@@ -20,10 +20,13 @@ def _seconds_to_reach_worker_count(workers_active: List[Tuple[float, int]], work
 
 
 def two_base_saturation_timing(player: Player, replay: Replay) -> int:
-    workers_active = _get_workers_active_over_time(player, replay)
-    return _seconds_to_reach_worker_count(workers_active, 44)
+    return worker_count_timing(44, player, replay)
 
 
 def three_base_saturation_timing(player: Player, replay: Replay) -> int:
+    return worker_count_timing(66, player, replay)
+
+
+def worker_count_timing(worker_count: int, player: Player, replay: Replay) -> int:
     workers_active = _get_workers_active_over_time(player, replay)
-    return _seconds_to_reach_worker_count(workers_active, 66)
+    return _seconds_to_reach_worker_count(workers_active, worker_count)

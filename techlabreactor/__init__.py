@@ -5,7 +5,7 @@ from .injects import\
     find_first_queen_completed_frame_for_player, \
     get_inject_pops_for_player
 
-from .workers import two_base_saturation_timing, three_base_saturation_timing
+from .workers import two_base_saturation_timing, three_base_saturation_timing, worker_count_timing
 
 from .upgrades import first_upgrade_started_timing
 
