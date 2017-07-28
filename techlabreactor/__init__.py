@@ -14,3 +14,5 @@ from .expansions import natural_expansion_timing, third_expansion_timing
 from .summary import generate_replay_summary
 
 from .tiers import lair_started_timing
+
+from .gases import second_gas_timing
