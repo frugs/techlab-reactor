@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-VERSION = "0.0.13"
+VERSION = "0.0.14"
 
 setup(
   name='techlabreactor',
@@ -10,7 +10,6 @@ setup(
   author='Hugo Wainwright',
   author_email='wainwrighthugo@gmail.com',
   url='https://github.com/frugs/techlab-reactor',
-  download_url='https://github.com/frugs/techlab-reactor/tarball/' + VERSION,
   keywords=['sc2', 'replay', 'sc2reader'],
   classifiers=[],
 )

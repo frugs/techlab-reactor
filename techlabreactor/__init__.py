@@ -9,10 +9,12 @@ from .workers import two_base_saturation_timing, three_base_saturation_timing, w
 
 from .upgrades import first_upgrade_started_timing
 
-from .expansions import natural_expansion_timing, third_expansion_timing
+from .expansions import natural_expansion_timing, third_expansion_timing, fourth_expansion_timing
 
 from .summary import generate_replay_summary
 
 from .tiers import lair_started_timing
 
 from .gases import second_gas_timing
+
+from .spores import safety_spores_timing
