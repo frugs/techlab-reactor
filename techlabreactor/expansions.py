@@ -29,3 +29,8 @@ def natural_expansion_timing(player: Player, replay: Replay) -> int:
 def third_expansion_timing(player: Player, replay: Replay) -> int:
     hatchery_start_times = _get_hatchery_start_times(player, replay)
     return hatchery_start_times[2] if len(hatchery_start_times) >= 3 else -1
+
+
+def fourth_expansion_timing(player: Player, replay: Replay) -> int:
+    hatchery_start_times = _get_hatchery_start_times(player, replay)
+    return hatchery_start_times[3] if len(hatchery_start_times) >= 4 else -1
