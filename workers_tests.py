@@ -15,3 +15,15 @@ class TestWorkers(unittest.TestCase):
 
         three_base_saturation = techlabreactor.three_base_saturation_timing(replay.players[0], replay)
         self.assertEqual(three_base_saturation, 428)
+
+    def test_worker_supply_1(self):
+        replay = sc2reader.load_replay("test_replays/frugs_vs_ai.SC2Replay")
+
+        worker_supply = techlabreactor.worker_supply_at(270, replay.players[0], replay)
+        self.assertEqual(worker_supply, 52)
+
+    def test_worker_supply_2(self):
+        replay = sc2reader.load_replay("test_replays/snute.SC2Replay")
+
+        worker_supply = techlabreactor.worker_supply_at(270, replay.players[1], replay)
+        self.assertEqual(worker_supply, 56)
