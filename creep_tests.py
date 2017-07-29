@@ -20,6 +20,6 @@ class TestCreep(unittest.TestCase):
 
     def test_creep_3(self):
         replay = sc2reader.load_replay("test_replays/snute.SC2Replay")
-        result = techlabreactor.creep_tumours_built_before_second(420, replay.players[0], replay)
+        result = techlabreactor.creep_tumours_built_before_second(420, replay.players[1], replay)
 
-        self.assertEqual(result, 0)
+        self.assertEqual(result, 27)
