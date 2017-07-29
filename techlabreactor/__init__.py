@@ -20,3 +20,5 @@ from .gases import second_gas_timing
 from .spores import safety_spores_timing
 
 from .researches import research_finished_timing, overlord_speed_research_started_timing
+
+from .creep import creep_tumours_built_before_second
