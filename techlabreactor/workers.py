@@ -35,17 +35,31 @@ def worker_count_timing(worker_count: int, player: Player, replay: Replay) -> in
 
 
 def worker_supply_at(seconds: int, player: Player, replay: Replay) -> int:
-    if player.play_race in ["Zerg", "Terran"]:
+    player_stats_events = [
+        x
+        for x in replay.tracker_events
+        if x.name == "PlayerStatsEvent" and x.player == player]
 
-        worker_started_times = [
-            int(event.frame / (1.4 * replay.game_fps)) - WORKER_BUILD_DURATION
+    if player_stats_events:
+        workers_active_at_time = next(
+            iter(
+                sorted(
+                    player_stats_events,
+                    key=lambda x: abs((x.frame / (1.4 * replay.game_fps)) - seconds)))).workers_active_count
+    else:
+        workers_active_at_time = 0
+
+    workers_in_progress_at_time = [
+            event.unit
             for event
             in replay.events
             if (event.name in ["UnitBornEvent", "UnitDoneEvent"] and
                 event.unit.owner == player and
-                event.unit.name in ["Drone", "Probe", "SCV"])]
+                event.unit.name in ["Drone", "Probe", "SCV"] and
+                event.unit.started_at / (1.4 * replay.game_fps) <= seconds and
+                event.unit.died_at is not None and
+                event.unit.died_at / (1.4 * replay.game_fps) > seconds and
+                event.unit.finished_at is not None and
+                event.unit.finished_at / (1.4 * replay.game_fps) > seconds)]
 
-        workers_built_before_cutoff = [time for time in worker_started_times if time < seconds]
-        return len(workers_built_before_cutoff)
-    else:
-        return -1
+    return workers_active_at_time + len(workers_in_progress_at_time)

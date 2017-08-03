@@ -20,10 +20,10 @@ class TestWorkers(unittest.TestCase):
         replay = sc2reader.load_replay("test_replays/frugs.SC2Replay")
 
         worker_supply = techlabreactor.worker_supply_at(270, replay.players[0], replay)
-        self.assertEqual(worker_supply, 52)
+        self.assertEqual(worker_supply, 43)
 
     def test_worker_supply_2(self):
         replay = sc2reader.load_replay("test_replays/snute.SC2Replay")
 
         worker_supply = techlabreactor.worker_supply_at(270, replay.players[1], replay)
-        self.assertEqual(worker_supply, 56)
+        self.assertEqual(worker_supply, 52)
