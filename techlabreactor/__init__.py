@@ -24,3 +24,5 @@ from .researches import research_finished_timing, overlord_speed_research_starte
 from .creep import creep_tumours_built_before_second
 
 from .production import production_used_till_time_for_player, production_capacity_till_time_for_player
+
+from .supply import get_supply_blocks_till_time_for_player
