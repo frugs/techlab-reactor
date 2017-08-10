@@ -15,22 +15,19 @@ PLANETARY_FORTRESS_TRANSFORMATION_DURATION = 36
 
 def _get_production_duration(unit_type: UnitType, replay: Replay) -> float:
     if "Reactor" in unit_type.name:
-        return 36
-
-    if "TechLab" in unit_type.name:
-        return 25
-
-    if unit_type.name == "Cyclone":
-        return 32
-
-    if unit_type.name == "Liberator":
-        return 43
-
-    build_time = [
-        ability.build_time
-        for ability
-        in replay.datapack.abilities.values()
-        if ability.is_build and ability.build_unit == unit_type]
+        build_time = 50
+    elif "TechLab" in unit_type.name:
+        build_time = 25
+    elif unit_type.name == "Cyclone":
+        build_time = 45
+    elif unit_type.name == "Liberator":
+        build_time = 60
+    else:
+        build_time = [
+            ability.build_time
+            for ability
+            in replay.datapack.abilities.values()
+            if ability.is_build and ability.build_unit == unit_type]
 
     if not build_time:
         raise Exception
