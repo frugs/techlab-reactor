@@ -22,6 +22,8 @@ def _get_production_duration(unit_type: UnitType, replay: Replay) -> float:
         build_time = 45
     elif unit_type.name == "Liberator":
         build_time = 60
+    elif unit_type.name == "BattleHellion":
+        build_time = 30
     else:
         matching_build_times = [
             ability.build_time
@@ -59,7 +61,7 @@ def _get_structure_type(unit_type: UnitType) -> str:
     if unit_name in ["Marine", "Marauder", "Reaper", "Ghost"]:
         return "Barracks"
 
-    if unit_name in ["Hellion", "Hellbat", "Cyclone", "SiegeTank", "Thor", "WidowMine"]:
+    if unit_name in ["Hellion", "BattleHellion", "Cyclone", "SiegeTank", "Thor", "WidowMine"]:
         return "Factory"
 
     if unit_name in ["Medivac", "Viking", "Liberator", "Raven", "Banshee", "Battlecruiser"]:
@@ -122,8 +124,10 @@ def production_used_till_time_for_player(
 
         result[structure_type].append((time, current_production + modified_production))
 
+    limit = min(second, frame_to_second(replay.frames))
+
     for key in result.keys():
-        result[key].append((second, result[key][-1][1]))
+        result[key].append((limit, result[key][-1][1]))
 
     return OrderedDict(sorted(result.items(), key=_order_by_tech_tier))
 
@@ -204,13 +208,15 @@ def production_capacity_till_time_for_player(
     for structure_type, time, modified_production_capacity in event_stream:
         if structure_type not in result:
             current_production_capacity = 0
-            result[structure_type] = [(time - 0.00001, current_production_capacity)]
+            result[structure_type] = [(time, current_production_capacity)]
         else:
             current_production_capacity = result[structure_type][-1][1]
 
         result[structure_type].append((time, current_production_capacity + modified_production_capacity))
 
+    limit = min(second, frame_to_second(replay.frames))
+
     for key in result.keys():
-        result[key].append((second, result[key][-1][1]))
+        result[key].append((limit, result[key][-1][1]))
 
     return OrderedDict(sorted(result.items(), key=_order_by_tech_tier))
