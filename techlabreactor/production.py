@@ -23,16 +23,18 @@ def _get_production_duration(unit_type: UnitType, replay: Replay) -> float:
     elif unit_type.name == "Liberator":
         build_time = 60
     else:
-        build_time = [
+        matching_build_times = [
             ability.build_time
             for ability
             in replay.datapack.abilities.values()
             if ability.is_build and ability.build_unit == unit_type]
 
-    if not build_time:
-        raise Exception
+        if not matching_build_times:
+            raise Exception
 
-    return math.floor(build_time[0] / 1.4)
+        build_time = matching_build_times[0]
+
+    return math.floor(build_time / 1.4)
 
 
 def _get_unit_type(unit: Unit) -> UnitType:
