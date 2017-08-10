@@ -34,7 +34,7 @@ def _get_production_duration(unit_type: UnitType, replay: Replay) -> float:
 
         build_time = matching_build_times[0]
 
-    return math.floor(build_time / 1.4)
+    return build_time / 1.44
 
 
 def _get_unit_type(unit: Unit) -> UnitType:
