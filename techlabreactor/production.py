@@ -94,6 +94,8 @@ def production_used_till_time_for_player(
                 event.unit.name != "MULE" and
                 ("TechLab" in event.unit.name or
                  "Reactor" in event.unit.name or
+                 "Liberator" in event.unit.name or
+                 "Cyclone" in event.unit.name or
                  event.unit.is_army or
                  event.unit.is_worker)))
 
