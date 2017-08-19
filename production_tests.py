@@ -36,8 +36,8 @@ class TestProduction(unittest.TestCase):
 
     def test_production(self):
         replay = sc2reader.load_replay("test_replays/picur.SC2Replay")
-        production_used = techlabreactor.production_used_till_time_for_player(420, replay.players[1], replay)
-        production_capacity = techlabreactor.production_capacity_till_time_for_player(420, replay.players[1], replay)
+        production_used, production_capacity = techlabreactor.production_used_out_of_capacity_for_player(
+            420, replay.players[1], replay)
 
         for structure_type, capacities in production_capacity.items():
             for time, capacity in capacities:
