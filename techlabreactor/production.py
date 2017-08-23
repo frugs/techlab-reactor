@@ -2,77 +2,21 @@ import itertools
 from collections import OrderedDict
 from typing import Dict, Tuple, List, Set, Union
 
-from sc2reader.data import Unit, UnitType
+from sc2reader.data import Unit
 from sc2reader.events import UnitBornEvent, UnitDoneEvent
 from sc2reader.objects import Player
 from sc2reader.resources import Replay
 
 from .gametime import frame_to_second
+from .util import production_structure_types, get_unit_type, get_structure_type, get_production_duration, is_unit_produced
 
 ORBITAL_TRANSFORMATION_DURATION = 25
 PLANETARY_FORTRESS_TRANSFORMATION_DURATION = 36
 
 
-def _get_production_duration(unit_type: UnitType, replay: Replay) -> float:
-    if "Reactor" in unit_type.name:
-        build_time = 50
-    elif "TechLab" in unit_type.name:
-        build_time = 25
-    elif unit_type.name == "Cyclone":
-        build_time = 45
-    elif unit_type.name == "Liberator":
-        build_time = 60
-    elif unit_type.name == "BattleHellion":
-        build_time = 30
-    else:
-        matching_build_times = [
-            ability.build_time
-            for ability
-            in replay.datapack.abilities.values()
-            if ability.is_build and ability.build_unit == unit_type]
-
-        if not matching_build_times:
-            raise Exception
-
-        build_time = matching_build_times[0]
-
-    return build_time / 1.44
-
-
-def _get_unit_type(unit: Unit) -> UnitType:
-    return next(iter(unit.type_history.values()))
-
-
-def _get_structure_type(unit_type: UnitType) -> str:
-    unit_name = unit_type.name
-
-    if "Barracks" in unit_name:
-        return "Barracks"
-
-    if "Factory" in unit_name:
-        return "Factory"
-
-    if "Starport" in unit_name:
-        return "Starport"
-
-    if unit_name == "SCV":
-        return "CommandCenter"
-
-    if unit_name in ["Marine", "Marauder", "Reaper", "Ghost"]:
-        return "Barracks"
-
-    if unit_name in ["Hellion", "BattleHellion", "Cyclone", "SiegeTank", "Thor", "WidowMine"]:
-        return "Factory"
-
-    if unit_name in ["Medivac", "Viking", "Liberator", "Raven", "Banshee", "Battlecruiser"]:
-        return "Starport"
-
-    return "Unknown"
-
-
 def _order_by_tech_tier(args):
     structure_type = args[0]
-    return ["CommandCenter", "Barracks", "Factory", "Starport", "Unknown"].index(structure_type)
+    return (production_structure_types() + ["Unknown"]).index(structure_type)
 
 
 def _extract_production_structures(unit_events: List[Union[UnitBornEvent, UnitDoneEvent]]) -> Set[Unit]:
@@ -80,12 +24,7 @@ def _extract_production_structures(unit_events: List[Union[UnitBornEvent, UnitDo
         event.unit
         for event
         in unit_events
-        if _get_unit_type(event.unit).name in [
-            "CommandCenter",
-            "Barracks",
-            "Factory",
-            "Starport"
-        ])
+        if get_unit_type(event.unit).name in production_structure_types())
 
 
 def _extract_produced_units(unit_events: List[Union[UnitBornEvent, UnitDoneEvent]]) -> Set[Unit]:
@@ -93,15 +32,7 @@ def _extract_produced_units(unit_events: List[Union[UnitBornEvent, UnitDoneEvent
         event.unit
         for event
         in unit_events
-        if (event.unit.finished_at > 0 and
-            not event.unit.hallucinated and
-            event.unit.name != "MULE" and
-            ("TechLab" in event.unit.name or
-             "Reactor" in event.unit.name or
-             "Liberator" in event.unit.name or
-             "Cyclone" in event.unit.name or
-             event.unit.is_army or
-             event.unit.is_worker)))
+        if is_unit_produced(event.unit))
 
 
 def _terran_production_used_and_capacity_events(
@@ -115,10 +46,10 @@ def _terran_production_used_and_capacity_events(
         filter(
             lambda x: x[1] <= limit_seconds,
             [
-                (_get_structure_type(_get_unit_type(unit)),
-                 frame_to_second(unit.finished_at) - _get_production_duration(_get_unit_type(unit), replay),
+                (get_structure_type(get_unit_type(unit)),
+                 frame_to_second(unit.finished_at) - get_production_duration(get_unit_type(unit), replay),
                  1),
-                (_get_structure_type(_get_unit_type(unit)),
+                (get_structure_type(get_unit_type(unit)),
                  frame_to_second(unit.finished_at),
                  -1)])
         for unit
@@ -129,12 +60,12 @@ def _terran_production_used_and_capacity_events(
     for unit in production_structures:
         second_finished_at = frame_to_second(unit.finished_at)
         if second_finished_at <= limit_seconds:
-            production_capacity_events.append((_get_unit_type(unit).name, second_finished_at, 1))
+            production_capacity_events.append((get_unit_type(unit).name, second_finished_at, 1))
 
         if unit.died_at is not None:
             second_died_at = frame_to_second(unit.died_at)
             if second_died_at <= limit_seconds:
-                production_capacity_events.append((_get_unit_type(unit).name, second_died_at, -1))
+                production_capacity_events.append((get_unit_type(unit).name, second_died_at, -1))
 
         was_flying = False
         for frame, unit_type in unit.type_history.items():
@@ -146,22 +77,22 @@ def _terran_production_used_and_capacity_events(
                 continue
 
             if "Flying" in unit_type.name:
-                production_capacity_events.append((_get_unit_type(unit).name, second, -1))
+                production_capacity_events.append((get_unit_type(unit).name, second, -1))
                 was_flying = True
             elif was_flying:
-                production_capacity_events.append((_get_unit_type(unit).name, second, 1))
+                production_capacity_events.append((get_unit_type(unit).name, second, 1))
                 was_flying = False
             elif "OrbitalCommand" in unit.name:
                 production_capacity_events.append(
-                    (_get_unit_type(unit).name, second - ORBITAL_TRANSFORMATION_DURATION, -1))
-                production_capacity_events.append((_get_unit_type(unit).name, second, 1))
+                    (get_unit_type(unit).name, second - ORBITAL_TRANSFORMATION_DURATION, -1))
+                production_capacity_events.append((get_unit_type(unit).name, second, 1))
             elif "PlanetaryFortress" in unit.name:
                 production_capacity_events.append(
                     (
-                        _get_unit_type(unit).name,
+                        get_unit_type(unit).name,
                         second - PLANETARY_FORTRESS_TRANSFORMATION_DURATION,
                         -1))
-                production_capacity_events.append((_get_unit_type(unit).name, second, 1))
+                production_capacity_events.append((get_unit_type(unit).name, second, 1))
 
     for unit in reactors:
         previous_structure_type = "Unknown"
@@ -174,7 +105,7 @@ def _terran_production_used_and_capacity_events(
             if previous_structure_type != "Unknown":
                 production_capacity_events.append((previous_structure_type, transformed_second, -1))
 
-            previous_structure_type = _get_structure_type(unit_type)
+            previous_structure_type = get_structure_type(unit_type)
 
             if previous_structure_type != "Unknown":
                 production_capacity_events.append((previous_structure_type, transformed_second, 1))
