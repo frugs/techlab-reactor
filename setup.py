@@ -1,8 +1,8 @@
-from distutils.core import setup
+import setuptools
 
 VERSION = "0.0.27"
 
-setup(
+setuptools.setup(
   name='techlabreactor',
   packages=['techlabreactor'],
   version=VERSION,
