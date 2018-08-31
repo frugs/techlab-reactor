@@ -6,8 +6,11 @@ TIME_LIMIT_SECONDS = 60 * 7 * 1.4
 QUEEN_INJECT_SECONDS = 40
 
 
-def _hatchery_events_for_player(player: Player, replay: Replay) -> dict:
-    time_limit = TIME_LIMIT_SECONDS * int(replay.game_fps)
+def _hatchery_events_for_player(player: Player, replay: Replay, time_limit_seconds: float) -> dict:
+    if time_limit_seconds > 0:
+        time_limit = time_limit_seconds * int(replay.game_fps)
+    else:
+        time_limit = replay.frames
 
     player_hatcheries = [
         x.unit
@@ -48,7 +51,7 @@ def _hatchery_events_for_player(player: Player, replay: Replay) -> dict:
     return hatchery_events
 
 
-def _events_to_inject_states(events: list, fps: int) -> dict:
+def _events_to_inject_states(events: list, fps: int) -> list:
     inject_stack = []
     state_changes = []
 
@@ -74,8 +77,9 @@ def _events_to_inject_states(events: list, fps: int) -> dict:
     return state_changes
 
 
-def get_hatchery_inject_states_for_player(player: Player, replay: Replay) -> list:
-    hatchery_events = _hatchery_events_for_player(player, replay)
+def get_hatchery_inject_states_for_player(
+        player: Player, replay: Replay, time_limit_seconds: float = TIME_LIMIT_SECONDS) -> list:
+    hatchery_events = _hatchery_events_for_player(player, replay, time_limit_seconds)
 
     hatchery_inject_state_changes = dict(
         (hatchery, _events_to_inject_states(events, int(replay.game_fps)))
@@ -129,10 +133,10 @@ def find_first_queen_completed_frame_for_player(player: Player, replay: Replay):
         return queen_birth_frames[0]
 
 
-def get_inject_pops_for_player(player: Player, replay: Replay) -> int:
+def get_inject_pops_for_player(player: Player, replay: Replay, time_limit_seconds: float = TIME_LIMIT_SECONDS) -> int:
     fps = int(replay.game_fps)
 
-    all_hatchery_events = _hatchery_events_for_player(player, replay)
+    all_hatchery_events = _hatchery_events_for_player(player, replay, time_limit_seconds)
 
     total_pops = 0
 

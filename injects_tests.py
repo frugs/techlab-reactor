@@ -11,3 +11,9 @@ class TestInjects(unittest.TestCase):
         result = techlabreactor.get_inject_pops_for_player(replay.players[0], replay)
 
         self.assertEqual(result, 20)
+
+    def test_inject_pops_full(self):
+        replay = sc2reader.load_replay("test_replays/frugs.SC2Replay")
+        result = techlabreactor.get_inject_pops_for_player(replay.players[0], replay, 0)
+
+        self.assertEqual(result, 45)
