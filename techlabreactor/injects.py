@@ -20,7 +20,7 @@ def _hatchery_events_for_player(player: Player, replay: Replay, time_limit_secon
             (isinstance(x, UnitInitEvent) or isinstance(x, UnitBornEvent)) and
             x.unit.name in ["Hatchery", "Lair", "Hive"] and
             x.unit.owner == player and
-            (x.unit.finished_at is not None and x.unit.finished_at <= time_limit_seconds * replay.game_fps)
+            (x.unit.finished_at is not None and x.unit.finished_at <= time_limit * replay.game_fps)
         )]
 
     hatchery_events = dict(
