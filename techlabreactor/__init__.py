@@ -21,7 +21,7 @@ from .spores import safety_spores_timing
 
 from .researches import research_finished_timing, overlord_speed_research_started_timing
 
-from .creep import creep_tumours_built_before_second
+from .creep import creep_tumours_built_before_second, creep_tumour_state_changes
 
 from .production import\
     production_used_till_time_for_player, \
