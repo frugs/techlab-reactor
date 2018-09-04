@@ -59,20 +59,22 @@ def _events_to_inject_states(events: list, fps: int) -> list:
         if event_name == "Start":
             state_changes.append((event_time, False))
         else:
-            while inject_stack and inject_stack[0] <= event_time:
-                inject_pop = inject_stack[0]
-                inject_stack = inject_stack[1:]
+            # Sometimes we get replays where we see events before 'Start' - ignore them
+            if state_changes:
+                while inject_stack and inject_stack[0] <= event_time:
+                    inject_pop = inject_stack[0]
+                    inject_stack = inject_stack[1:]
 
-                if not inject_stack:
-                    state_changes.append((inject_pop, False))
+                    if not inject_stack:
+                        state_changes.append((inject_pop, False))
 
-            if event_name == "End":
-                state_changes.append((event_time, state_changes[-1][1]))
-            elif event_name == "Inject":
-                inject_stack.append(event_time + QUEEN_INJECT_SECONDS * fps)
+                if event_name == "End":
+                    state_changes.append((event_time, state_changes[-1][1]))
+                elif event_name == "Inject":
+                    inject_stack.append(event_time + QUEEN_INJECT_SECONDS * fps)
 
-                if not state_changes[-1][1]:
-                    state_changes.append((event_time, True))
+                    if not state_changes[-1][1]:
+                        state_changes.append((event_time, True))
 
     return state_changes
 
