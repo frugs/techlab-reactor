@@ -31,3 +31,5 @@ from .production import\
 from .supply import get_supply_blocks_till_time_for_player
 
 from .util import get_production_duration, get_unit_type, get_structure_type, production_structure_types, is_unit_produced
+
+from .larvae import larvae_blocks_per_hatchery_for_player
