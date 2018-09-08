@@ -1,6 +1,6 @@
 import setuptools
 
-VERSION = "0.0.30"
+VERSION = "0.0.31"
 
 setuptools.setup(
   name='techlabreactor',
