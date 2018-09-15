@@ -1,6 +1,6 @@
 import setuptools
 
-VERSION = "0.0.31"
+VERSION = "0.0.32"
 
 setuptools.setup(
   name='techlabreactor',
@@ -12,4 +12,5 @@ setuptools.setup(
   url='https://github.com/frugs/techlab-reactor',
   keywords=['sc2', 'replay', 'sc2reader'],
   classifiers=[],
+  install_requires=['sc2reader'],
 )
