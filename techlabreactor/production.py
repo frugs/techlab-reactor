@@ -8,7 +8,7 @@ from sc2reader.objects import Player
 from sc2reader.resources import Replay
 
 from .gametime import frame_to_second
-from .util import production_structure_types, get_unit_type, get_structure_type, get_production_duration, is_unit_produced
+from .util import production_structure_types, get_unit_type, get_unit_type_name, get_structure_type, get_production_duration, is_unit_produced
 
 ORBITAL_TRANSFORMATION_DURATION = 25
 PLANETARY_FORTRESS_TRANSFORMATION_DURATION = 36
@@ -24,7 +24,7 @@ def _extract_production_structures(unit_events: List[Union[UnitBornEvent, UnitDo
         event.unit
         for event
         in unit_events
-        if get_unit_type(event.unit).name in production_structure_types())
+        if get_unit_type_name(event.unit) in production_structure_types())
 
 
 def _extract_produced_units(unit_events: List[Union[UnitBornEvent, UnitDoneEvent]]) -> Set[Unit]:
@@ -40,7 +40,7 @@ def _terran_production_used_and_capacity_events(
         produced_units: Set[Unit],
         production_structures: Set[Unit],
         reactors: Set[Unit],
-        limit_seconds: int = 0) -> Tuple[List[Tuple[float, int]], List[Tuple[float, int]]]:
+        limit_seconds: int = 0) -> Tuple[List[Tuple[str, float, int]], List[Tuple[str, float, int]]]:
 
     production_events = list(itertools.chain.from_iterable(
         filter(
@@ -53,19 +53,20 @@ def _terran_production_used_and_capacity_events(
                  frame_to_second(unit.finished_at),
                  -1)])
         for unit
-        in produced_units))
+        in produced_units
+        if unit.finished_at > 0))
     production_events.sort(key=lambda x: x[1])
 
     production_capacity_events = []
     for unit in production_structures:
         second_finished_at = frame_to_second(unit.finished_at)
         if second_finished_at <= limit_seconds:
-            production_capacity_events.append((get_unit_type(unit).name, second_finished_at, 1))
+            production_capacity_events.append((get_unit_type_name(unit), second_finished_at, 1))
 
         if unit.died_at is not None:
             second_died_at = frame_to_second(unit.died_at)
             if second_died_at <= limit_seconds:
-                production_capacity_events.append((get_unit_type(unit).name, second_died_at, -1))
+                production_capacity_events.append((get_unit_type_name(unit), second_died_at, -1))
 
         was_flying = False
         for frame, unit_type in unit.type_history.items():
@@ -77,22 +78,22 @@ def _terran_production_used_and_capacity_events(
                 continue
 
             if "Flying" in unit_type.name:
-                production_capacity_events.append((get_unit_type(unit).name, second, -1))
+                production_capacity_events.append((get_unit_type_name(unit), second, -1))
                 was_flying = True
             elif was_flying:
-                production_capacity_events.append((get_unit_type(unit).name, second, 1))
+                production_capacity_events.append((get_unit_type_name(unit), second, 1))
                 was_flying = False
             elif "OrbitalCommand" in unit.name:
                 production_capacity_events.append(
-                    (get_unit_type(unit).name, second - ORBITAL_TRANSFORMATION_DURATION, -1))
-                production_capacity_events.append((get_unit_type(unit).name, second, 1))
+                    (get_unit_type_name(unit), second - ORBITAL_TRANSFORMATION_DURATION, -1))
+                production_capacity_events.append((get_unit_type_name(unit), second, 1))
             elif "PlanetaryFortress" in unit.name:
                 production_capacity_events.append(
                     (
-                        get_unit_type(unit).name,
+                        get_unit_type_name(unit),
                         second - PLANETARY_FORTRESS_TRANSFORMATION_DURATION,
                         -1))
-                production_capacity_events.append((get_unit_type(unit).name, second, 1))
+                production_capacity_events.append((get_unit_type_name(unit), second, 1))
 
     for unit in reactors:
         previous_structure_type = "Unknown"
@@ -118,7 +119,7 @@ def _terran_production_used_and_capacity_events(
 def production_used_out_of_capacity_for_player(
         limit_seconds: int,
         player: Player,
-        replay: Replay) -> Dict[str, Tuple[List[Tuple[float, int]], List[Tuple[float, int]]]]:
+        replay: Replay) -> Tuple[Dict[str, List[Tuple[float, int]]], Dict[str, List[Tuple[float, int]]]]:
 
     unit_events = [
         event

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from sc2reader.data import Unit, UnitType
 from sc2reader.resources import Replay
@@ -19,7 +19,8 @@ PRODUCTION_STRUCTURE_TYPES = [
 def is_unit_produced(unit: Unit) -> bool:
     return (
         not unit.hallucinated
-        and unit.name != "MULE" and (
+        and unit.name is not None
+        and unit.name not in ["MULE", "AutoTurret"] and (
             "TechLab" in unit.name or
             "Reactor" in unit.name or
             "Liberator" in unit.name or
@@ -58,8 +59,13 @@ def get_production_duration(unit_type: UnitType, replay: Replay) -> float:
     return build_time / 1.44
 
 
-def get_unit_type(unit: Unit) -> UnitType:
-    return next(iter(unit.type_history.values()))
+def get_unit_type(unit: Unit) -> Optional[UnitType]:
+    return next(iter(unit.type_history.values()), None)
+
+
+def get_unit_type_name(unit: Unit) -> str:
+    unit_type = next(iter(unit.type_history.values()), None)
+    return unit_type.name if unit_type is not None else ""
 
 
 def get_structure_type(unit_type: UnitType) -> str:
