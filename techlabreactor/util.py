@@ -49,10 +49,10 @@ def get_production_duration(unit_type: UnitType, replay: Replay) -> float:
             ability.build_time
             for ability
             in replay.datapack.abilities.values()
-            if ability.is_build and ability.build_unit == unit_type]
+            if ability.is_build and ability.build_unit.name == unit_type.name]
 
         if not matching_build_times:
-            raise Exception
+            raise Exception("Unknown build time for unit: " + unit_type.name)
 
         build_time = matching_build_times[0]
 
